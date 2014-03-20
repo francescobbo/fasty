@@ -11,3 +11,7 @@
 *.lai
 *.la
 *.a
+
+.anjuta/
+fasty.anjuta
+.anjuta_sym_db.db
