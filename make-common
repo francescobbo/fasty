@@ -1,4 +1,4 @@
-CXXFLAGS := -O0 -Wall -Werror -c
+CXXFLAGS := -O0 -Wall -Werror -std=c++11 -c
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $< -o $@
