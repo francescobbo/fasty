@@ -11,3 +11,8 @@ $(OUTPUT): $(OBJS)
 
 server/libserver.a:
 	cd server && $(MAKE) all
+	
+clean:
+	rm -f $(OBJS)
+	rm -f $(OUTPUT)
+

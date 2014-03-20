@@ -15,3 +15,5 @@
 .anjuta/
 fasty.anjuta
 .anjuta_sym_db.db
+*~
+app

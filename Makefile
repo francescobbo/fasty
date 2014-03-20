@@ -10,3 +10,8 @@ $(OUTPUT): $(LIBS)
 
 server/libserver.a:
 	cd server && $(MAKE) all
+	
+clean:
+	cd server && $(MAKE) clean
+	rm $(OUTPUT)
+
