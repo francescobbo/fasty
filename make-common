@@ -1,0 +1,4 @@
+CXXFLAGS := -O0 -Wall -Werror -c
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $< -o $@
