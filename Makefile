@@ -1,20 +1,19 @@
-MAKEFLAGS += --no-print-directory
+MAKEFLAGS += --no-print-directory -s
 OUTPUT = app
 LIBS = server/libserver.a utils/libutils.a
 
 all: $(OUTPUT)
 	
 
-$(OUTPUT): $(LIBS)
+$(OUTPUT): libs $(LIBS)
 	$(CXX) $(LIBS) -o $@
 
-server/libserver.a:
+libs:
 	cd server && $(MAKE) all
-
-utils/libutils.a:
 	cd utils && $(MAKE) all
 	
 clean:
 	cd server && $(MAKE) clean
+	cd utils && $(MAKE) clean
 	rm $(OUTPUT)
 
