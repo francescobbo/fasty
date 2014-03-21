@@ -1,10 +1,12 @@
 #include "string.h"
+#include <cstdarg>
 #include <cstdio>
 #include <cstring>
 #include <cctype>
+#include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 
 using namespace std;
 
@@ -93,6 +95,28 @@ String &String::erase_s(int start, int length) {
 		data[i] = data[i + length];
 		
 	return *this;
+}
+
+String String::format(const String &fmt, ...) {
+	int n = fmt.length() * 2;
+	std::unique_ptr<char[]> formatted;
+
+	va_list ap;
+	while (true) {
+		formatted.reset(new char[n]);
+		strcpy(&formatted[0], fmt);
+		
+		va_start(ap, fmt);
+		int result = vsnprintf(&formatted[0], n, fmt, ap);
+		va_end(ap);
+
+		if (result < 0 || result >= n)
+			n += abs(result - n + 1);
+		else
+			break;
+	}
+	
+	return String(formatted.get());
 }
 
 int String::index(char c, int skip) const {
