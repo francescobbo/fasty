@@ -15,13 +15,17 @@ public:
 	size_t length() const;
 	size_t size() const;
 
+	String capitalize() const;
+	String &capitalize_s();
 	bool casecmp(const String &str) const;
+	void clear();
 	bool contains(const String &str) const;
 	String erase(int start, int length) const;
 	String &erase_s(int start, int length);
 	static String format(const String &fmt, ...);
 	int index(char c, int skip = 0) const;
 	int index(const String &str, int skip = 0) const;
+	bool is_empty() const;
 	String lowercase() const;
 	String &lowercase_s();
 	String replace(const String &find, const String &replace) const;

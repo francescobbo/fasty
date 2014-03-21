@@ -60,6 +60,20 @@ size_t String::size() const {
 	return strlen(data);
 }
 
+String String::capitalize() const {
+	String copy(*this);
+	return copy.capitalize_s();
+}
+
+String &String::capitalize_s() {
+	if (length() > 0) {
+		lowercase_s();
+		data[0] = toupper(data[0]);
+	}
+		
+	return *this;
+}
+
 bool String::casecmp(const String &str) const {
 	int i = 0;
 	for (; data[i] != '\0' and str.data[i] != '\0'; i++) {
@@ -68,6 +82,10 @@ bool String::casecmp(const String &str) const {
 	}
 
 	return data[i] == str.data[i] and data[i] == '\0';
+}
+
+void String::clear() {
+	data[0] = 0;
 }
 
 bool String::contains(const String &str) const {
@@ -129,6 +147,10 @@ int String::index(const String &str, int skip) const {
 	char *pos = strstr(data + skip, str.data);
 	long index = (long) (pos - data);
 	return index >= 0 ? index : -1;
+}
+
+bool String::is_empty() const {
+	return length() == 0;
 }
 
 String String::lowercase() const {
