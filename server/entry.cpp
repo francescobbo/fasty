@@ -65,14 +65,39 @@ void parse_arguments(int argc, char *argv[]) {
 	}
 }
 
+void create_pid_file() {
+	if (!Dir::exists(File::dirname(pid_file)))
+		Dir::mkdir_p(File::dirname(pid_file), 0755);
+
+	File f(pid_file, "w");
+	f.write(String("") + getpid());
+	f.close();
+}
+
+void delete_pid_file() {
+	File::remove(pid_file);
+}
+
+void signal_handler(int signal) {
+	cout << "Terminating..." << endl;
+	delete_pid_file();
+	exit(0);
+}
+
 int main(int argc, char *argv[]) {
 	parse_arguments(argc, argv);
 
+	signal(SIGINT, signal_handler);
+	signal(SIGTERM, signal_handler);
+
 	try {
+		create_pid_file();
+
 		ServerSocket s(server_port);
 
-		while (true)
+		while (true) {
 			ClientSocket client = s.next();
+		}
 	} catch (std::exception &e) {
 		cout << e.what() << endl;
 	}
