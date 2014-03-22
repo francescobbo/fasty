@@ -202,3 +202,4 @@ void Blob::save(String fn) {
 	fwrite(data, _size, 1, f);
 	fclose(f);
 }
+

@@ -2,7 +2,7 @@ include ../make-common
 
 MAKEFLAGS += --no-print-directory
 OUTPUT = libserver.a
-OBJS = entry.o
+OBJS = entry.o socket.o client_socket.o server_socket.o
 
 all: $(OUTPUT)
 
