@@ -1,6 +1,7 @@
 #include "blob.h"
 #include "file.h"
 #include "string.h"
+#include "errno_exception.h"
 
 #include <sys/stat.h>
 #include <sys/unistd.h>
@@ -18,7 +19,7 @@ int File::atime(const String &file_name) {
 	struct stat buf;
 
 	if (stat(file_name, &buf) < 0)
-		throw "Stat failure";
+		throw ErrnoException("Could not stat " + file_name, errno);
 
 	return buf.st_atime;
 }
@@ -27,7 +28,7 @@ int File::ctime(const String &file_name) {
 	struct stat buf;
 
 	if (stat(file_name, &buf) < 0)
-		throw "Stat failure";
+		throw ErrnoException("Could not stat " + file_name, errno);
 
 	return buf.st_ctime;
 }
@@ -115,7 +116,7 @@ int File::mtime(const String &file_name) {
 	struct stat buf;
 	
 	if (stat(file_name, &buf) < 0)
-		throw "Stat failure";
+		throw ErrnoException("Could not stat " + file_name, errno);
 
 	long sec = buf.st_mtime;
 /*
@@ -137,7 +138,7 @@ long File::size(const String &file_name) {
 	struct stat buf;
 	
 	if (stat(file_name, &buf) < 0)
-		throw "Stat failure";
+		throw ErrnoException("Could not stat " + file_name, errno);
 
 	return buf.st_size;
 }
@@ -165,7 +166,7 @@ long File::size() const {
 	int fd = fileno(file);
 
 	if (fstat(fd, &buf)  == -1)
-		throw "Stat failure";
+		throw ErrnoException("Could not stat " + file_name, errno);
 
 	return buf.st_size;
 }
