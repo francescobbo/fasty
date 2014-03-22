@@ -7,6 +7,9 @@
 #include <cstring>
 
 ServerSocket::ServerSocket(int port) : Socket(0), port(port) {
+	if (port <= 0 || port > 65535)
+		throw ErrnoException("Port number out of range", ENOTSUP);
+
 	boot();
 }
 
