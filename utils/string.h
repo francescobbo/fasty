@@ -57,6 +57,7 @@ public:
 	String operator+(const char *str) const;
 	String operator+(int value) const;
 	operator const char *() const;
+	operator std::string() const;
 	char operator[](int index) const;
 	char &operator[](int index);
 	

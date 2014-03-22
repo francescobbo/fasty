@@ -378,6 +378,10 @@ String::operator const char *() const {
 	return data;
 }
 
+String::operator std::string() const {
+	return std::string(data);
+}
+
 char String::operator[](int index) const {
 	return data[index];
 }

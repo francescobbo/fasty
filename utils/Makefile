@@ -2,7 +2,7 @@ include ../make-common
 
 MAKEFLAGS += --no-print-directory
 OUTPUT = libutils.a
-OBJS = blob.o string.o
+OBJS = blob.o dir.o file.o string.o
 
 all: $(OUTPUT)
 
