@@ -15,5 +15,5 @@ libs:
 clean:
 	cd server && $(MAKE) clean
 	cd utils && $(MAKE) clean
-	rm $(OUTPUT)
+	rm -f $(OUTPUT)
 
