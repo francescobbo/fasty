@@ -20,11 +20,14 @@ public:
 	static bool is_readable(const String &file_name);
 //	static Time mtime(const String &file_name);
 	static int mtime(const String &file_name);
+	static void remove(const String &file_name);
 	static long size(const String &file_name);
 
 	int atime();
 	void close();
 	Blob read(int length = -1);
+	bool write(const String &content);
+	bool write(const Blob &content);
 	long size() const;
 	long tell() const;
 

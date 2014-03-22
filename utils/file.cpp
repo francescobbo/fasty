@@ -134,6 +134,10 @@ int File::mtime(const String &file_name) {
 	return sec; //Time::at(sec, nsec);
 }
 
+void File::remove(const String &file_name) {
+	::remove(file_name);
+}
+
 long File::size(const String &file_name) {
 	struct stat buf;
 	
@@ -161,12 +165,24 @@ Blob File::read(int length) {
 	return result;
 }
 
+bool File::write(const String &content) {
+	int length = content.length();
+	int written = fwrite(content, 1, length, file);
+	return written == length;
+}
+
+bool File::write(const Blob &content) {
+	int length = content.size();
+	int written = fwrite(content.ptr(), 1, length, file);
+	return written == length;
+}
+
 long File::size() const {
 	struct stat buf;
 	int fd = fileno(file);
 
 	if (fstat(fd, &buf)  == -1)
-		throw ErrnoException("Could not stat " + file_name, errno);
+		throw ErrnoException("Could not stat this file", errno);
 
 	return buf.st_size;
 }
