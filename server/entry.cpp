@@ -33,13 +33,13 @@ void parse_arguments(int argc, char *argv[]) {
 		switch (opt) {
 			case 'h':
 				cout << "Usage: ./fasty [options]" << endl;
-				cout << "	-p, --port=port                  Runs the server on the specified port." << endl;
-				cout << "                                    Default: 5000" << endl;
-				cout << "	-d, --daemon                     Run the server as a daemon." << endl;
-				cout << "	-P, --pid=pid                    Specified the PID file." << endl;
-				cout << "                                    Default: tmp/pids/server.pid" << endl;
+				cout << "    -p, --port=port                  Runs the server on the specified port." << endl;
+				cout << "                                     Default: 5000" << endl;
+				cout << "    -d, --daemon                     Run the server as a daemon." << endl;
+				cout << "    -P, --pid=pid                    Specified the PID file." << endl;
+				cout << "                                     Default: tmp/pids/server.pid" << endl;
 				cout << endl;
-				cout << "	-h, --help                       Show this help message." << endl;
+				cout << "    -h, --help                       Show this help message." << endl;
 				exit(0);
 				break;
 			case 'd': {
