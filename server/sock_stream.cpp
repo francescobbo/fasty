@@ -51,7 +51,7 @@ Blob SockStream::read_bytes(int count) {
 }
 
 void SockStream::ensure_chars(int count) {
-	if (position + count > buffer.size()) {
+	while (position + count > buffer.size()) {
 		Blob temp = socket.receive();
 		buffer += temp;
 	}
