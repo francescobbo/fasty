@@ -1,4 +1,6 @@
 #include "http_server.h"
+#include "request_line.h"
+#include "../utils/http_status_codes.h"
 
 #include <iostream>
 using namespace std;
@@ -20,9 +22,27 @@ HttpServer::HttpServer(ClientSocket client) : client(client), stream(client) {
 }
 
 void HttpServer::run() {
-	while (true) {
+	bool closing = false;
+
+	while (!closing) {
 		ignore_newlines();
-		parse_request_line();
+		RequestLine request_line(stream.read_to_crlf());
+
+		if (request_line.http2_preface()) {
+			String http2_preface_end = stream.peek_string(8);
+			if (http2_preface_end == "\r\nSM\r\n\r\n") {
+				cout << "Oh my god. An HTTP/2 client!" << endl;
+			} else {
+				// Partial HTTP/2 preface. Should read as an invalid HTTP/1.1
+				// method (WTF is PRI?)
+				http_error(400, true);
+			}
+
+			closing = true;
+		} else if (!request_line.valid()) {
+			http_error(400, true);
+			closing = true;
+		}
 	}
 }
 
@@ -33,7 +53,23 @@ void HttpServer::ignore_newlines() {
 
 void HttpServer::parse_request_line() {
 	String request_line = stream.read_to_crlf();
-	
+
 	cout << "Request line: " << request_line << endl;
+}
+
+void HttpServer::http_error(int code, bool connection_close) {
+	String title = http_status_codes[code];
+	String description = http_status_descriptions[code];
+
+	String response = String::format("HTTP/1.1 %d %s\r\n", code, (const char *) title);;
+	if (connection_close)
+		response += "Connection: close\r\n";
+
+	response += String::format("\r\n<!DOCTYPE html><html><head><title>%d %s</title></head><body><h1>%s</h1>\r\n<p>%s</p><hr/><address>CRails/1.0 (Unix) Server at localhost Port 3010</address></body></html>",
+		code, (const char *) title,
+		(const char *) title,
+		(const char *) description);
+
+	client.send(response);
 }
 

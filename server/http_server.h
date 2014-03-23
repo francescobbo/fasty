@@ -14,6 +14,7 @@ private:
 	SockStream stream;
 
 	void run();
+	void http_error(int code, bool connection_close);
 
 	void ignore_newlines();
 	void parse_request_line();
