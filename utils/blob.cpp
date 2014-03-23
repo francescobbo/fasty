@@ -18,8 +18,11 @@ Blob::Blob(const char *buffer, int length) {
 }
 
 Blob::Blob(const Blob &copy) : _size(copy._size), capacity(copy.capacity) {
-	data = new unsigned char[capacity];
-	memcpy(data, copy.data, _size);
+	if (copy.data) {
+		data = new unsigned char[capacity];
+		memcpy(data, copy.data, _size);
+	} else
+		data = nullptr;
 }
 
 Blob::Blob(const String &copy) : Blob(copy, copy.size()) {
@@ -47,7 +50,7 @@ bool Blob::contains(const Blob &blob) const {
 }
 
 int Blob::index(unsigned char c, int start) const {
-	for (int i = start; i < _size; i++) {
+	for (size_t i = start; i < _size; i++) {
 		if (data[i] == c)
 			return i;
 	}
@@ -56,11 +59,11 @@ int Blob::index(unsigned char c, int start) const {
 }
 
 int Blob::index(const String &str, int start) const {
-	int str_length = str.size();
+	size_t str_length = str.size();
 	if (str_length > _size)
 		return -1;
 
-	for (int i = start; i < _size - str_length + 1; i++) {
+	for (size_t i = start; i < _size - str_length + 1; i++) {
 		if (!memcmp(&data[i], str, str_length))
 			return i;
 	}
@@ -72,12 +75,34 @@ int Blob::index(const Blob &blob, int start) const {
 	if (blob._size > _size)
 		return -1;
 
-	for (int i = start; i < _size - blob._size; i++) {
+	for (size_t i = start; i < _size - blob._size; i++) {
 		if (!memcmp(&data[i], blob.ptr(), blob._size))
 			return i;
 	}
 
 	return -1;
+}
+
+Blob Blob::substr(int start, int length) const {
+	if (start < 0 and length < 0)
+		return Blob();
+
+	int cur_length = _size;
+
+	// Normalize start and length
+	if (start < 0)
+		start = cur_length + start;
+
+	if (start > cur_length)
+		return Blob();
+
+	if (length < 0)
+		length = cur_length + 1 + length;
+
+	if (start + length > cur_length)
+		length = cur_length - start;
+
+	return Blob((const char *) data + start, length);
 }
 
 Blob &Blob::operator=(const Blob &copy) {
@@ -100,7 +125,7 @@ Blob &Blob::operator=(const Blob &copy) {
 }
 
 bool Blob::operator==(const String &str) const {
-	int i = 0;
+	size_t i = 0;
 	for (; i < _size; i++) {
 		if (!str[i])
 			return false;
@@ -130,11 +155,11 @@ unsigned char *Blob::ptr() {
 	return data;
 }
 
-int Blob::size() const {
+size_t Blob::size() const {
 	return _size;
 }
 
-void Blob::size(int size) {
+void Blob::size(size_t size) {
 	ensure_capacity(size);
 	_size = size;
 }

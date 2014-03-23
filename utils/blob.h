@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 class String;
 
 class Blob {
@@ -18,6 +20,8 @@ public:
 	int index(unsigned char c, int start = 0) const;
 	int index(const String &str, int start = 0) const;
 	int index(const Blob &blob, int start = 0) const;
+
+	Blob substr(int start, int length = -1) const;
 
 	Blob &operator=(const Blob &copy);
 	bool operator==(const Blob &blob) const;
@@ -38,14 +42,14 @@ public:
 	const unsigned char operator[](int index) const;
 	unsigned char &operator[](int index);
 
-	int size() const;
-	void size(int new_size);	// When creating a blob dynamically, you might want to alter it's size
+	size_t size() const;
+	void size(size_t new_size);	// When creating a blob dynamically, you might want to alter it's size
 
 	void ensure_capacity(int minimum);
 
 private:
 	unsigned char *data;
-	int _size;
+	size_t _size;
 	int capacity;
 };
 
