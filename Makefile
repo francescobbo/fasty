@@ -6,7 +6,7 @@ all: $(OUTPUT)
 	
 
 $(OUTPUT): libs $(LIBS)
-	$(CXX) $(LIBS) -o $@
+	$(CXX) $(LIBS) -lpthread -o $@
 
 libs:
 	cd server && $(MAKE) all

@@ -8,6 +8,7 @@
 #include "../utils/file.h"
 #include "../utils/dir.h"
 #include "server_socket.h"
+#include "http_server.h"
 
 using namespace std;
 
@@ -97,6 +98,9 @@ int main(int argc, char *argv[]) {
 
 		while (true) {
 			ClientSocket client = s.next();
+
+			pthread_t tid;
+			pthread_create(&tid, NULL, (void *(*)(void *)) &HttpServer::InitThread, (void *) new ClientSocket(client));
 		}
 	} catch (std::exception &e) {
 		cout << e.what() << endl;
