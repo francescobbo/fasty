@@ -15,7 +15,7 @@ public:
 	Blob read_bytes(int count);
 
 private:
-	void ensure_chars(int count);
+	void ensure_chars(int count, int firstIndex = -1);
 
 	Socket &socket;
 	Blob buffer;

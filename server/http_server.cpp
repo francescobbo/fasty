@@ -12,9 +12,9 @@ void HttpServer::InitThread(ClientSocket *client) {
 	} catch (std::exception &e) {
 		cout << "Connection aborted." << endl;
 		cout << e.what() << endl;
-		client->shutdown();
 	}
 
+	client->shutdown();
 	delete client;
 }
 
@@ -42,6 +42,13 @@ void HttpServer::run() {
 		} else if (!request_line.valid()) {
 			http_error(400, true);
 			closing = true;
+		} else {
+			vector<String> headers;
+
+			for (String line = stream.read_to_crlf(); line != ""; line = stream.read_to_crlf())
+				headers.push_back(line);
+
+			http_error(200, false);
 		}
 	}
 }
@@ -62,14 +69,17 @@ void HttpServer::http_error(int code, bool connection_close) {
 	String description = http_status_descriptions[code];
 
 	String response = String::format("HTTP/1.1 %d %s\r\n", code, (const char *) title);;
-	if (connection_close)
-		response += "Connection: close\r\n";
 
-	response += String::format("\r\n<!DOCTYPE html><html><head><title>%d %s</title></head><body><h1>%s</h1>\r\n<p>%s</p><hr/><address>CRails/1.0 (Unix) Server at localhost Port 3010</address></body></html>",
+	String response_body = String::format("\r\n<!DOCTYPE html><html><head><title>%d %s</title></head><body><h1>%s</h1>\r\n<p>%s</p><hr/><address>CRails/1.0 (Unix) Server at localhost Port 3010</address></body></html>\r\n",
 		code, (const char *) title,
 		(const char *) title,
 		(const char *) description);
 
-	client.send(response);
+	if (connection_close)
+		response += "Connection: close\r\n";
+  else
+    response += String::format("Content-Length: %d\r\n", response_body.length() - 2);
+
+	client.send(response + response_body);
 }
 

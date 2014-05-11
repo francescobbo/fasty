@@ -26,7 +26,7 @@ String SockStream::peek_to_crlf() {
 	size_t start = position;
 
 	while (true) {
-		ensure_chars(2);
+		ensure_chars(2, start);
 
 		int line_end = buffer.index("\r\n", start);
 		if (line_end >= 0) {
@@ -50,8 +50,11 @@ Blob SockStream::read_bytes(int count) {
 	return result;
 }
 
-void SockStream::ensure_chars(int count) {
-	while (position + count > buffer.size()) {
+void SockStream::ensure_chars(int count, int firstIndex) {
+  if (firstIndex == -1)
+    firstIndex = position;
+
+	while ((size_t) (firstIndex + count) > buffer.size()) {
 		Blob temp = socket.receive();
 		buffer += temp;
 	}
