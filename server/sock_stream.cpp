@@ -1,5 +1,6 @@
 #include "sock_stream.h"
 #include <sys/socket.h>
+#include <string.h>
 
 SockStream::SockStream(Socket &socket) : socket(socket), buffer("") {
 	position = 0;
@@ -50,9 +51,15 @@ Blob SockStream::read_bytes(int count) {
 	return result;
 }
 
+void SockStream::read_bytes(unsigned char *destination, int count) {
+	ensure_chars(count);
+	memcpy(destination, buffer.ptr() + position, count);
+	position += count;
+}
+
 void SockStream::ensure_chars(int count, int firstIndex) {
-  if (firstIndex == -1)
-    firstIndex = position;
+	if (firstIndex == -1)
+		firstIndex = position;
 
 	while ((size_t) (firstIndex + count) > buffer.size()) {
 		Blob temp = socket.receive();

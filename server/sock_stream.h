@@ -13,6 +13,7 @@ public:
 	String peek_to_crlf();
 	String read_to_crlf();
 	Blob read_bytes(int count);
+	void read_bytes(unsigned char *destination, int count);
 
 private:
 	void ensure_chars(int count, int firstIndex = -1);
