@@ -1,4 +1,5 @@
 #include "http_server.h"
+#include "http2_server.h"
 #include "request_line.h"
 #include "../utils/http_status_codes.h"
 
@@ -12,6 +13,8 @@ void HttpServer::InitThread(ClientSocket *client) {
 	} catch (std::exception &e) {
 		cout << "Connection aborted." << endl;
 		cout << e.what() << endl;
+	} catch (...) {
+		cout << "Connection aborted due to unknown exception" << endl;
 	}
 
 	client->shutdown();
@@ -31,7 +34,10 @@ void HttpServer::run() {
 		if (request_line.http2_preface()) {
 			String http2_preface_end = stream.peek_string(8);
 			if (http2_preface_end == "\r\nSM\r\n\r\n") {
-				cout << "Oh my god. An HTTP/2 client!" << endl;
+				stream.skip(8);
+				Http2Server http2(stream, client);
+				http2.run();
+				closing = true;
 			} else {
 				// Partial HTTP/2 preface. Should read as an invalid HTTP/1.1
 				// method (WTF is PRI?)
