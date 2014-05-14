@@ -105,12 +105,53 @@ void signal_handler(int signal) {
 	exit(0);
 }
 
+#if ENABLE_HTTP2
+/**
+ * This callback method is called by OpenSSL when a client sends an ALPN
+ * request with his supported methods.
+ * The client methods are stored as a length-prefixed string array.
+ * The server should put his supported methods (among the client ones) in @out.
+ *
+ * This is the only legitimate way to negotiate HTTP2 over TLS.
+ */
+int alpn_callback(SSL *s, const unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen, void *arg) {
+	for (unsigned int i = 0; i < inlen; i += in[i] + 1)
+	{
+		String protocol = String((const char *) &in[i + 1]).substr(0, in[i]);
+
+		/*
+		 * Most draft implementations either declare HTTP2 with "h2-something"
+		 * or "HTTP-draft-something", where "h2" whill be the ufficial protocol
+		 * name.
+		 */
+		if (protocol.substr(0, 2) == "h2" || protocol.substr(0, 11) == "HTTP-draft-") {
+			/* Report the protocol as a length prefixed array in @out */
+			*out = (unsigned char *) in + i + 1;
+			*outlen = in[i];
+
+			/* Inform OpenSSL of the success */
+			return SSL_TLSEXT_ERR_OK;
+		}
+	}
+
+	/*
+	 * Inform OpenSSL that a common protocol was not found (clients will fall
+	 * back to HTTP/1.1)
+	 */
+	return SSL_TLSEXT_ERR_NOACK;
+}
+#endif
+
 void init_openssl() {
 	SSL_library_init();
 	OpenSSL_add_all_algorithms();
 	SSL_load_error_strings();
 	ssl_method = TLSv1_2_server_method();
 	ssl_ctx = SSL_CTX_new(ssl_method);
+
+#if ENABLE_HTTP2
+	SSL_CTX_set_alpn_select_cb(ssl_ctx, alpn_callback, nullptr);
+#endif
 
 	if (!ssl_ctx) {
 		cout << "Could not create SSL Context. Exiting..." << endl;
