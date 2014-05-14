@@ -2,7 +2,7 @@
 #include <sys/socket.h>
 #include <string.h>
 
-SockStream::SockStream(Socket &socket) : socket(socket), buffer("") {
+SockStream::SockStream(ClientSocket &socket) : socket(socket), buffer("") {
 	position = 0;
 }
 

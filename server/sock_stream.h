@@ -2,11 +2,11 @@
 
 #include "../utils/blob.h"
 #include "../utils/string.h"
-#include "socket.h"
+#include "client_socket.h"
 
 class SockStream {
 public:
-	SockStream(Socket &socket);
+	SockStream(ClientSocket &socket);
 
 	void skip(int count);
 	String peek_string(int length);
@@ -18,7 +18,7 @@ public:
 private:
 	void ensure_chars(int count, int firstIndex = -1);
 
-	Socket &socket;
+	ClientSocket &socket;
 	Blob buffer;
 	size_t position;
 };

@@ -8,11 +8,7 @@ public:
 	Socket(int socket);
 	Socket(const Socket &copy);
 	Socket(Socket &&move);
-
-	void send(const char *data, int length);
-	void send(const String &s);
-	void send(const Blob &s);
-	Blob receive();
+	virtual ~Socket();
 
 	void shutdown();
 

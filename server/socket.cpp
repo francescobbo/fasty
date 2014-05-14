@@ -21,30 +21,7 @@ Socket::Socket(Socket &&move) {
 	move.sock = -1;
 }
 
-void Socket::send(const char *data, int length) {
-	if (::send(sock, data, length, MSG_NOSIGNAL) < 0)
-		throw ErrnoException("Error while sending data to client", errno);
-}
-
-void Socket::send(const Blob &data) {
-	if (::send(sock, data.ptr(), data.size(), MSG_NOSIGNAL) < 0)
-		throw ErrnoException("Error while sending data to client", errno);
-}
-
-void Socket::send(const String &data) {
-	if (::send(sock, data, data.length(), MSG_NOSIGNAL) < 0)
-		throw ErrnoException("Error while sending data to client", errno);
-}
-
-Blob Socket::receive() {
-	char buffer[1024];
-	
-	int read = recv(sock, buffer, 1024, 0);
-	if (read < 0)
-		throw ErrnoException("Error while receiving data from client", errno);
-
-	return Blob(buffer, read);
-}
+Socket::~Socket() {}
 
 void Socket::shutdown() {
 	if (!closed and sock >= 0) {
