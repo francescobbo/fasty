@@ -15,6 +15,7 @@ using namespace std;
 
 int https_server_port = 443;
 int http_server_port = 80;
+bool disable_http_redirect = false;
 bool disable_ssl = false;
 
 String pid_file = "tmp/pids/server.pid";
@@ -29,12 +30,13 @@ void parse_arguments(int argc, char *argv[]) {
 		{ "daemon", no_argument, NULL, 'd' },
 		{ "pid", required_argument, NULL, 'f' },
 		{ "no-ssl", no_argument, NULL, 's' },
+		{ "no-http-redirect", no_argument, NULL, 'r' },
 		{ 0, 0, 0, 0 }
 	};
 
 	while (true) {
 		opterr = 0;
-		int opt = getopt_long(argc, argv, "hdsp:P:", long_options, NULL);
+		int opt = getopt_long(argc, argv, "hdsrp:P:", long_options, NULL);
 		if (opt == -1)
 			break;
 
@@ -45,6 +47,7 @@ void parse_arguments(int argc, char *argv[]) {
 				cout << "        --http-port=port           Runs the HTTP server on the specified port." << endl;
 				cout << "        Defaults: 443 and 80 when run as root, 5001 and 5000 otherwise." << endl << endl;
 				cout << "        --no-ssl                   Disable HTTPS." << endl;
+				cout << "        --no-http-redirect         Disable HTTP to HTTPS redirection." << endl;
 				cout << "    -d, --daemon                   Run the server as a daemon." << endl;
 				cout << "    -P, --pid=pid                  Specified the PID file." << endl;
 				cout << "                                   Default: tmp/pids/server.pid" << endl;
@@ -74,6 +77,9 @@ void parse_arguments(int argc, char *argv[]) {
 				break;
 			case 'f':
 				pid_file = String(optarg);
+				break;
+			case 'r':
+				disable_http_redirect = true;
 				break;
 			case 's':
 				disable_ssl = true;
@@ -169,6 +175,23 @@ void init_openssl() {
 	}
 }
 
+void http_redirect_loop(void *param) {
+	try {
+		ServerSocket s(http_server_port, false);
+
+		cout << "Starting HTTP redirect server on port " << http_server_port << endl;
+
+		while (true) {
+			ClientSocket client = s.next();
+
+			pthread_t tid;
+			pthread_create(&tid, NULL, (void *(*)(void *)) &HttpServer::InitRedirectThread, (void *) new ClientSocket(client));
+		}
+	} catch (std::exception &e) {
+		cout << e.what() << endl;
+	}
+}
+
 int main(int argc, char *argv[]) {
 	if (geteuid() != 0) {
 		https_server_port = 5001;
@@ -191,6 +214,11 @@ int main(int argc, char *argv[]) {
 			cout << "Starting HTTP server on port " << http_server_port << endl;
 		else
 			cout << "Starting HTTPS server on port " << https_server_port << endl;
+
+		if (!disable_ssl and !disable_http_redirect) {
+			pthread_t tid;
+			pthread_create(&tid, NULL, (void *(*)(void *)) &http_redirect_loop, nullptr);
+		}
 
 		while (true) {
 			ClientSocket client = s.next();
