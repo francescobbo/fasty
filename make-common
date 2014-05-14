@@ -1,4 +1,4 @@
-CXXFLAGS := -O0 -Wall -Werror -std=c++11 -c
+CXXFLAGS := -O0 -g -Wall -Werror -std=c++11 -I/usr/local/ssl/include/ -c
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $< -o $@

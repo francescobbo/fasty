@@ -6,7 +6,7 @@ all: $(OUTPUT)
 	
 
 $(OUTPUT): libs $(LIBS)
-	$(CXX) $(LIBS) -lpthread -o $@
+	$(CXX) $(LIBS) -L/usr/local/ssl/lib -lpthread -lssl -lcrypto -ldl -o $@
 
 libs:
 	cd server && $(MAKE) all
