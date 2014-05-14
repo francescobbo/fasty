@@ -129,6 +129,11 @@ void init_openssl() {
 }
 
 int main(int argc, char *argv[]) {
+	if (geteuid() != 0) {
+		https_server_port = 5001;
+		http_server_port = 5000;
+	}
+
 	parse_arguments(argc, argv);
 
 	signal(SIGINT, signal_handler);
