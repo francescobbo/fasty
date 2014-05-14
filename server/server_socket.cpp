@@ -6,7 +6,7 @@
 #include <netinet/in.h>
 #include <cstring>
 
-ServerSocket::ServerSocket(int port) : Socket(0), port(port) {
+ServerSocket::ServerSocket(int port, bool use_ssl) : Socket(0), ssl(use_ssl), port(port) {
 	if (port <= 0 || port > 65535)
 		throw ErrnoException("Port number out of range", ENOTSUP);
 
@@ -25,7 +25,7 @@ ClientSocket ServerSocket::next() {
 	memset(ip, 0, INET_ADDRSTRLEN);
 	inet_ntop(AF_INET, &remote.sin_addr.s_addr, ip, INET_ADDRSTRLEN);
 	
-	return ClientSocket(client, ip);
+	return ClientSocket(client, ip, ssl);
 }
 
 void ServerSocket::boot() {

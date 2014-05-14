@@ -10,12 +10,10 @@ public:
 	Socket(Socket &&move);
 	virtual ~Socket();
 
-	void shutdown();
+	virtual void shutdown();
 
 protected:
 	int sock;
-
-private:
 	bool closed;
 };
 
