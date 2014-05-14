@@ -8,8 +8,17 @@ using namespace std;
 
 enum class FrameTypes : unsigned char {
 	Data = 0,
-	Settings = 1,
-	GoAway = 7
+	Headers = 1,
+	Priority = 2,
+	RstStream = 3,
+	Settings = 4,
+	PushPromise = 5,
+	Ping = 6,
+	GoAway = 7,
+	WindowUpdate = 8,
+	Continuation = 9,
+	AltSvc = 10,
+	Blocked = 11
 };
 
 enum class Http2Errors {
