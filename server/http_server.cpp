@@ -1,15 +1,42 @@
 #include "http_server.h"
 #include "http2_server.h"
+#include "http_headers.h"
 #include "request_line.h"
 #include "../utils/http_status_codes.h"
 
 #include <iostream>
 using namespace std;
 
+extern int http_server_port;
+extern int https_server_port;
+
 void HttpServer::InitThread(ClientSocket *client) {
 	try {
 		HttpServer s(*client);
 		s.run();
+	} catch (std::exception &e) {
+		cout << "Connection aborted." << endl;
+		cout << e.what() << endl;
+	} catch (const char *s) {
+		cout << "Connection aborted." << endl;
+		cout << s << endl;
+	} catch (String &s) {
+		cout << "Connection aborted." << endl;
+		cout << s << endl;
+	} catch (...) {
+		cout << "Connection aborted due to unknown exception" << endl;
+	}
+
+	client->shutdown();
+	delete client;
+}
+
+void HttpServer::InitRedirectThread(ClientSocket *client) {
+	cout << "Redirect Thread started!" << endl;
+
+	try {
+		HttpServer s(*client);
+		s.run_redirect();
 	} catch (std::exception &e) {
 		cout << "Connection aborted." << endl;
 		cout << e.what() << endl;
@@ -49,25 +76,43 @@ void HttpServer::run() {
 			http_error(400, true);
 			closing = true;
 		} else {
-			vector<String> headers;
+			HttpHeaders headers;
 
 			for (String line = stream.read_to_crlf(); line != ""; line = stream.read_to_crlf())
-				headers.push_back(line);
+				headers.add(line);
+
+			if (!headers.has_header("host")) {
+				http_error(400, true);
+				closing = true;
+			}
 
 			http_error(200, false);
 		}
 	}
 }
 
+void HttpServer::run_redirect() {
+	ignore_newlines();
+	RequestLine request_line(stream.read_to_crlf());
+
+	if (!request_line.valid()) {
+		http_error(400, true);
+	} else {
+		HttpHeaders headers;
+
+		for (String line = stream.read_to_crlf(); line != ""; line = stream.read_to_crlf())
+			headers.add(line);
+
+		if (!headers.has_header("host"))
+			http_error(400, true);
+		else
+			https_redirect(headers["host"], request_line.path());
+	}
+}
+
 void HttpServer::ignore_newlines() {
 	while (stream.peek_string(2) == "\r\n")
 		stream.skip(2);
-}
-
-void HttpServer::parse_request_line() {
-	String request_line = stream.read_to_crlf();
-
-	cout << "Request line: " << request_line << endl;
 }
 
 void HttpServer::http_error(int code, bool connection_close) {
@@ -89,3 +134,16 @@ void HttpServer::http_error(int code, bool connection_close) {
 	client.send(response + response_body);
 }
 
+void HttpServer::https_redirect(const String &host, const String &path) {
+	String new_host = host;
+
+	int colon = new_host.index(':');
+	if (colon > 0)
+		new_host = new_host.substr(0, colon);
+
+	if (https_server_port != 443)
+		new_host += String(":") + https_server_port;
+
+	String response = String::format("HTTP/1.1 301 Moved Permanently\r\nContent-Length: 0\r\nLocation: https://%s%s\r\nServer: fasty\r\n\r\n", (const char *) new_host, (const char *) path);
+	client.send(response);
+}
