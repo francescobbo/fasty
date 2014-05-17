@@ -11,11 +11,11 @@ using namespace std;
 extern int http_server_port;
 extern int https_server_port;
 
-void HttpServer::InitThread(ClientSocket *client) {
+void HttpServer::InitThread(ClientSocket client) {
 	cout << "[S] Connection started" << endl;
 
 	try {
-		HttpServer s(*client);
+		HttpServer s(client);
 		s.run();
 	} catch (const ConnectionClosedException &e) {
 		cout << "[S] Connection closed. Bye :)" << endl;
@@ -32,15 +32,15 @@ void HttpServer::InitThread(ClientSocket *client) {
 		cout << "[S] Connection aborted due to unknown exception" << endl;
 	}
 
-	client->shutdown();
-	delete client;
+	client.shutdown();
+	_Exit(0);
 }
 
-void HttpServer::InitRedirectThread(ClientSocket *client) {
+void HttpServer::InitRedirectThread(ClientSocket client) {
 	cout << "[R] Connection started" << endl;
 
 	try {
-		HttpServer s(*client);
+		HttpServer s(client);
 		s.run_redirect();
 	} catch (const ConnectionClosedException &e) {
 		cout << "[R] Connection closed. Bye :)" << endl;
@@ -54,11 +54,11 @@ void HttpServer::InitRedirectThread(ClientSocket *client) {
 		cout << "[R] Connection aborted due to unknown exception" << endl;
 	}
 
-	client->shutdown();
-	delete client;
+	client.shutdown();
+	_Exit(0);
 }
 
-HttpServer::HttpServer(ClientSocket client) : client(client), stream(client) {
+HttpServer::HttpServer(ClientSocket &client) : client(client), stream(client) {
 }
 
 void HttpServer::run() {

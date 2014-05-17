@@ -5,10 +5,10 @@
 
 class HttpServer {
 public:
-	static void InitThread(ClientSocket *client);
-	static void InitRedirectThread(ClientSocket *client);
+	static void InitThread(ClientSocket client);
+	static void InitRedirectThread(ClientSocket client);
 
-	HttpServer(ClientSocket socket);
+	HttpServer(ClientSocket &socket);
 
 private:
 	ClientSocket client;

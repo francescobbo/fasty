@@ -183,9 +183,8 @@ void http_redirect_loop(void *param) {
 
 		while (true) {
 			ClientSocket client = s.next();
-
-			pthread_t tid;
-			pthread_create(&tid, NULL, (void *(*)(void *)) &HttpServer::InitRedirectThread, (void *) new ClientSocket(client));
+			if (!fork())
+				HttpServer::InitRedirectThread(client);
 		}
 	} catch (std::exception &e) {
 		cout << e.what() << endl;
@@ -222,9 +221,8 @@ int main(int argc, char *argv[]) {
 
 		while (true) {
 			ClientSocket client = s.next();
-
-			pthread_t tid;
-			pthread_create(&tid, NULL, (void *(*)(void *)) &HttpServer::InitThread, (void *) new ClientSocket(client));
+			if (!fork())
+				HttpServer::InitThread(client);
 		}
 	} catch (std::exception &e) {
 		cout << e.what() << endl;
