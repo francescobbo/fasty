@@ -1,4 +1,5 @@
 #include "client_socket.h"
+#include "exceptions.h"
 #include "../utils/errno_exception.h"
 
 #include <openssl/ssl.h>
@@ -32,8 +33,12 @@ void ClientSocket::send(const char *data, int length) {
 		if (SSL_write(ssl, data, length) <= 0)
 			throw "SSL Error while sending data to client.";
 	} else {
-		if (::send(sock, data, length, MSG_NOSIGNAL) < 0)
-			throw ErrnoException("Error while sending data to client", errno);
+		if (::send(sock, data, length, MSG_NOSIGNAL) < 0) {
+			if (errno == EPIPE || errno == ECONNRESET)
+				throw ConnectionClosedException();
+			else
+				throw ErrnoException("Error while sending data to client", errno);
+		}
 	}
 }
 
@@ -51,12 +56,19 @@ Blob ClientSocket::receive() {
 	int read;
 	if (ssl) {
 		read = SSL_read(ssl, buffer, 1024);
-		if (read <= 0)
+		if (read < 0)
 			throw "SSL Error while receiving data from client";
+		else if (read == 0)
+			throw ConnectionClosedException();
 	} else {
 		read = recv(sock, buffer, 1024, 0);
-		if (read < 0)
-			throw ErrnoException("Error while receiving data from client", errno);
+		if (read < 0) {
+			if (errno == EPIPE || errno == ECONNRESET)
+				throw ConnectionClosedException();
+			else
+				throw ErrnoException("Error while receiving data from client", errno);
+		} else if (read == 0)
+			throw ConnectionClosedException();
 	}
 
 	return Blob(buffer, read);

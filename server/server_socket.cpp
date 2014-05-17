@@ -48,4 +48,3 @@ void ServerSocket::boot() {
 	if (listen(sock, SOMAXCONN) < 0)
 		throw ErrnoException("Unable to listen from the port", errno);
 }
-

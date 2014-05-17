@@ -2,6 +2,7 @@
 #include "http2_server.h"
 #include "http_headers.h"
 #include "request_line.h"
+#include "exceptions.h"
 #include "../utils/http_status_codes.h"
 
 #include <iostream>
@@ -11,20 +12,24 @@ extern int http_server_port;
 extern int https_server_port;
 
 void HttpServer::InitThread(ClientSocket *client) {
+	cout << "[S] Connection started" << endl;
+
 	try {
 		HttpServer s(*client);
 		s.run();
+	} catch (const ConnectionClosedException &e) {
+		cout << "[S] Connection closed. Bye :)" << endl;
 	} catch (std::exception &e) {
-		cout << "Connection aborted." << endl;
+		cout << "[S] Connection aborted." << endl;
 		cout << e.what() << endl;
 	} catch (const char *s) {
-		cout << "Connection aborted." << endl;
+		cout << "[S] Connection aborted." << endl;
 		cout << s << endl;
 	} catch (String &s) {
-		cout << "Connection aborted." << endl;
+		cout << "[S] Connection aborted." << endl;
 		cout << s << endl;
 	} catch (...) {
-		cout << "Connection aborted due to unknown exception" << endl;
+		cout << "[S] Connection aborted due to unknown exception" << endl;
 	}
 
 	client->shutdown();
@@ -32,16 +37,21 @@ void HttpServer::InitThread(ClientSocket *client) {
 }
 
 void HttpServer::InitRedirectThread(ClientSocket *client) {
-	cout << "Redirect Thread started!" << endl;
+	cout << "[R] Connection started" << endl;
 
 	try {
 		HttpServer s(*client);
 		s.run_redirect();
+	} catch (const ConnectionClosedException &e) {
+		cout << "[R] Connection closed. Bye :)" << endl;
 	} catch (std::exception &e) {
-		cout << "Connection aborted." << endl;
+		cout << "[R] Connection aborted." << endl;
 		cout << e.what() << endl;
+	} catch (String &s) {
+		cout << "[R] Connection aborted." << endl;
+		cout << s << endl;
 	} catch (...) {
-		cout << "Connection aborted due to unknown exception" << endl;
+		cout << "[R] Connection aborted due to unknown exception" << endl;
 	}
 
 	client->shutdown();
@@ -121,10 +131,10 @@ void HttpServer::http_error(int code, bool connection_close) {
 
 	String response = String::format("HTTP/1.1 %d %s\r\n", code, (const char *) title);;
 
-	String response_body = String::format("\r\n<!DOCTYPE html><html><head><title>%d %s</title></head><body><h1>%s</h1>\r\n<p>%s</p><hr/><address>CRails/1.0 (Unix) Server at localhost Port 3010</address></body></html>\r\n",
+	String response_body = String::format("\r\n<!DOCTYPE html><html><head><title>%d %s</title></head><body><h1>%s</h1>\r\n<p>%s</p><hr/><address>CRails/1.0 (Unix) Server at localhost Port %d</address></body></html>\r\n",
 		code, (const char *) title,
 		(const char *) title,
-		(const char *) description);
+		(const char *) description, https_server_port);
 
 	if (connection_close)
 		response += "Connection: close\r\n";
@@ -144,6 +154,6 @@ void HttpServer::https_redirect(const String &host, const String &path) {
 	if (https_server_port != 443)
 		new_host += String(":") + https_server_port;
 
-	String response = String::format("HTTP/1.1 301 Moved Permanently\r\nContent-Length: 0\r\nLocation: https://%s%s\r\nServer: fasty\r\n\r\n", (const char *) new_host, (const char *) path);
+	String response = String::format("HTTP/1.1 301 Moved Permanently\r\nConnection: close\r\nContent-Length: 0\r\nLocation: https://%s%s\r\nServer: fasty\r\n\r\n", (const char *) new_host, (const char *) path);
 	client.send(response);
 }
