@@ -6,10 +6,10 @@ Fasty is a set of tools and libraries for Web Applications. It is written in C++
 It aims to full support of HTTP/2, which is already Work in progress, while we are still working to have HTTP/1.1 conformance.
 
 With enaugh time, I'd like to add support for all the nice things that make a web developer life happier like:
-# Haml
-# SCSS
-# Coffeescript
-# ActiveRecord
+* Haml
+* SCSS
+* Coffeescript
+* ActiveRecord
 
 
 Compilation
