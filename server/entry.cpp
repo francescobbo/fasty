@@ -155,6 +155,13 @@ void init_openssl() {
 	ssl_method = TLSv1_2_server_method();
 	ssl_ctx = SSL_CTX_new(ssl_method);
 
+	SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL);
+	SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
+	SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_COMPRESSION);
+	SSL_CTX_set_options(ssl_ctx, SSL_OP_SINGLE_DH_USE);
+	SSL_CTX_set_options(ssl_ctx, SSL_OP_SINGLE_ECDH_USE);
+
+	SSL_CTX_set_cipher_list(ssl_ctx, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
 #if ENABLE_HTTP2
 	SSL_CTX_set_alpn_select_cb(ssl_ctx, alpn_callback, nullptr);
 #endif

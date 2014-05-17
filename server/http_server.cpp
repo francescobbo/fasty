@@ -68,6 +68,7 @@ void HttpServer::run() {
 		ignore_newlines();
 		RequestLine request_line(stream.read_to_crlf());
 
+#if ENABLE_HTTP2
 		if (request_line.http2_preface()) {
 			String http2_preface_end = stream.peek_string(8);
 			if (http2_preface_end == "\r\nSM\r\n\r\n") {
@@ -83,6 +84,9 @@ void HttpServer::run() {
 
 			closing = true;
 		} else if (!request_line.valid()) {
+#else
+		if (!request_line.valid()) {
+#endif
 			http_error(400, true);
 			closing = true;
 		} else {
