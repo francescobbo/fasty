@@ -1,8 +1,5 @@
 #include "http_headers.h"
 
-#include <iostream>
-using namespace std;
-
 void HttpHeaders::add(String header_line) {
 	header_line.trim_s();
 
@@ -28,6 +25,10 @@ bool HttpHeaders::has_header(const String &header) {
 	return raw_headers.count(header.lowercase());
 }
 
-String &HttpHeaders::operator[](const String &header) {
-	return raw_headers[header.lowercase()];
+const String &HttpHeaders::operator[](const String &header) const {
+	auto it = raw_headers.find(header);
+	if (it == raw_headers.end())
+		return String::nil;
+	else
+		return it->second;
 }
