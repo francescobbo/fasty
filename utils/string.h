@@ -63,6 +63,10 @@ public:
 	
 	void ensure_capacity(int minimum);
 	
+	bool operator!() const;
+
+	static const String nil;
+
 private:
 	char *data;
 	int capacity;

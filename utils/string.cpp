@@ -10,6 +10,8 @@
 
 using namespace std;
 
+const String String::nil = "";
+
 String::String(const char *str) {
 	int length = strlen(str) + 1;
 
@@ -412,3 +414,6 @@ String operator+(const char *str1, const String &str2) {
 	return s + str2;
 }
 
+bool String::operator!() const {
+	return this == &nil;
+}
