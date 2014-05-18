@@ -4,6 +4,7 @@
 #include "request_line.h"
 #include "exceptions.h"
 #include "../utils/http_status_codes.h"
+#include "../framework/request.h"
 
 #include <iostream>
 using namespace std;
@@ -37,8 +38,6 @@ void HttpServer::InitThread(ClientSocket client) {
 }
 
 void HttpServer::InitRedirectThread(ClientSocket client) {
-	cout << "[R] Connection started" << endl;
-
 	try {
 		HttpServer s(client);
 		s.run_redirect();
@@ -62,9 +61,7 @@ HttpServer::HttpServer(ClientSocket &client) : client(client), stream(client) {
 }
 
 void HttpServer::run() {
-	bool closing = false;
-
-	while (!closing) {
+	while (true) {
 		ignore_newlines();
 		RequestLine request_line(stream.read_to_crlf());
 
@@ -75,33 +72,30 @@ void HttpServer::run() {
 				stream.skip(8);
 				Http2Server http2(stream, client);
 				http2.run();
-				closing = true;
 			} else {
 				// Partial HTTP/2 preface. Should read as an invalid HTTP/1.1
 				// method (WTF is PRI?)
 				http_error(400, true);
 			}
 
-			closing = true;
-		} else if (!request_line.valid()) {
-#else
-		if (!request_line.valid()) {
-#endif
-			http_error(400, true);
-			closing = true;
-		} else {
-			HttpHeaders headers;
-
-			for (String line = stream.read_to_crlf(); line != ""; line = stream.read_to_crlf())
-				headers.add(line);
-
-			if (!headers.has_header("host")) {
-				http_error(400, true);
-				closing = true;
-			}
-
-			http_error(200, false);
+			break;
 		}
+#endif
+
+		if (!request_line.valid()) {
+			http_error(400, true);
+			break;
+		}
+
+		for (String line = stream.read_to_crlf(); line != ""; line = stream.read_to_crlf())
+			request.add_header(line);
+
+		if (!request.host()) {
+			http_error(400, true);
+			break;
+		}
+
+		http_error(200, false);
 	}
 }
 
@@ -117,7 +111,7 @@ void HttpServer::run_redirect() {
 		for (String line = stream.read_to_crlf(); line != ""; line = stream.read_to_crlf())
 			headers.add(line);
 
-		if (!headers.has_header("host"))
+		if (!headers["host"])
 			http_error(400, true);
 		else
 			https_redirect(headers["host"], request_line.path());
