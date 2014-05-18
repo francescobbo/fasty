@@ -26,6 +26,16 @@ Socket::~Socket() {}
 void Socket::shutdown() {
 	if (!closed and sock >= 0) {
 		closed = true;
+
+		/**
+		 * The socket is shared among processes. close only releases the socket
+		 * in the current process. Shutdown effectively closes communicaion 
+		 * with the peer on all processes. However the socket number is not
+		 * releases. Need to fix this...
+		 * Big thanks to:
+		 * http://stackoverflow.com/questions/4160347/close-vs-shutdown-socket#comment4491371_4160356
+		 */
+		::shutdown(sock, 2);
 		close(sock);
 	}
 }
