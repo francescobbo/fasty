@@ -2,7 +2,7 @@ include ../make-common
 
 MAKEFLAGS += --no-print-directory
 OUTPUT = libframework.a
-OBJS = request.o
+OBJS = base64.o request.o secure_random.o
 
 all: $(OUTPUT)
 
