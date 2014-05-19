@@ -2,6 +2,7 @@
 #include "secure_random.h"
 
 #include <openssl/rand.h>
+#include <math.h>
 
 void SecureRandom::seed() {
 	RAND_poll();
@@ -47,4 +48,18 @@ String SecureRandom::uuid() {
 	parts[3] = (parts[3] & 0x3fff) | 0x8000;
 
 	return String::format("%08x-%04x-%04x-%04x-%04x%08x", parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+}
+
+double SecureRandom::random_number() {
+	Blob bytes = random_bytes(8);
+	uint64_t num = *(uint64_t *) bytes.ptr();
+
+	return ldexp(num >> (64 - 53), -53);
+}
+
+uint64_t SecureRandom::random_number(uint64_t limit) {
+	Blob rnd = random_bytes(8);
+    uint64_t num = *(uint64_t *) rnd.ptr();
+
+    return num % limit;
 }

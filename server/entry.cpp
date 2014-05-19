@@ -5,6 +5,7 @@
 #include <csignal>
 #include <openssl/ssl.h>
 
+#include "../framework/secure_random.h"
 #include "../utils/errno_exception.h"
 #include "../utils/file.h"
 #include "../utils/dir.h"
@@ -195,8 +196,6 @@ void http_redirect_loop(void *param) {
 		cout << e.what() << endl;
 	}
 }
-
-#include "../framework/secure_random.h"
 
 int main(int argc, char *argv[]) {
 	if (geteuid() != 0) {
