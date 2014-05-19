@@ -96,6 +96,8 @@ void HttpServer::run() {
 		}
 
 		http_error(200, false);
+
+		request.reset();
 	}
 }
 

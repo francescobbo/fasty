@@ -19,3 +19,7 @@ void Request::add_header(const String &line) {
 const String &Request::host() const {
 	return _headers["host"];
 }
+
+void Request::reset() {
+	_headers.clear();
+}

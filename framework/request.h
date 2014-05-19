@@ -15,6 +15,8 @@ public:
 
 	const String &host() const;
 
+	void reset();
+
 private:
 	HttpHeaders _headers;
 

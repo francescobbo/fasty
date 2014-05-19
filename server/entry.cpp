@@ -196,6 +196,8 @@ void http_redirect_loop(void *param) {
 	}
 }
 
+#include "../framework/secure_random.h"
+
 int main(int argc, char *argv[]) {
 	if (geteuid() != 0) {
 		https_server_port = 5001;
@@ -226,8 +228,10 @@ int main(int argc, char *argv[]) {
 
 		while (true) {
 			ClientSocket client = s.next();
-			if (!fork())
+			if (!fork()) {
+				SecureRandom::seed();
 				HttpServer::InitThread(client);
+			}
 		}
 	} catch (std::exception &e) {
 		cout << e.what() << endl;
